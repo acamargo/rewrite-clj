@@ -266,7 +266,7 @@ First line
                             z/root-string)))))))
 
 (deftest slurp-forward-over-a-collection
-  (testing "on a map"
+  (testing "on an empty map"
     (let [zloc (-> "(get {}) :a"
                    z/of-string
                    z/down
@@ -277,6 +277,18 @@ First line
       (is (= "(get {} :a)"
              (z/root-string slurped-zloc)))
       (is (= "{}"
+             (z/string slurped-zloc)))))
+  (testing "on a map"
+    (let [zloc (-> "(get {:foo :bar}) :baz"
+                   z/of-string
+                   z/down
+                   z/rightmost)
+          slurped-zloc (pe/slurp-forward zloc)]
+      (is (= "{:foo :bar}"
+             (z/string zloc)))
+      (is (= "(get {:foo :bar} :baz)"
+             (z/root-string slurped-zloc)))
+      (is (= "{:foo :bar}"
              (z/string slurped-zloc)))))
   (testing "on a whitespace"
     (let [zloc (-> "(get {} ) :a"
