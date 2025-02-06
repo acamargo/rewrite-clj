@@ -265,6 +265,42 @@ First line
                             pe/slurp-forward
                             z/root-string)))))))
 
+(deftest slurp-forward-over-a-collection
+  (testing "on a map"
+    (let [zloc (-> "(get {}) :a"
+                   z/of-string
+                   z/down
+                   z/rightmost)
+          slurped-zloc (pe/slurp-forward zloc)]
+      (is (= "{}"
+             (z/string zloc)))
+      (is (= "(get {} :a)"
+             (z/root-string slurped-zloc)))
+      (is (= "{}"
+             (z/string slurped-zloc)))))
+  (testing "on a whitespace"
+    (let [zloc (-> "(get {} ) :a"
+                   z/of-string
+                   z/down
+                   z/rightmost*)]
+      (is (= " "
+             (z/string zloc)))
+      (is (= "(get {} :a)"
+             (-> zloc
+                 pe/slurp-forward
+                 z/root-string)))))
+  (testing "on a vector"
+    (let [zloc (-> "(conj []) :a"
+                   z/of-string
+                   z/down
+                   z/rightmost)]
+      (is (= "[]"
+             (z/string zloc)))
+      (is (= "(conj [] :a)"
+             (-> zloc
+                 pe/slurp-forward
+                 z/root-string))))))
+
 (deftest slurp-forward-fully
   (doseq [opts zipper-opts]
     (testing (str "opts" opts)
